@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { SiteNav } from '@/components/site-nav';
 import { SiteFooter } from '@/components/site-footer';
@@ -123,7 +124,7 @@ export default function HomePage() {
 
         {/* Calculator */}
         <Section id="calculator" eyebrow="The estimate" title="See what an advance could cost">
-          <Calculator initialViz="donut" />
+          <Suspense><Calculator initialViz="donut" /></Suspense>
         </Section>
 
         {/* Why */}
