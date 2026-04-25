@@ -75,7 +75,7 @@ export function ProductPage({ slug }: { slug: ProductSlug }) {
               style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 60, alignItems: 'start' }}
             >
               <div>
-                <div className="eyebrow">What's included</div>
+                <div className="eyebrow">What&apos;s included</div>
                 <h2
                   style={{
                     fontFamily: 'var(--font-display)',

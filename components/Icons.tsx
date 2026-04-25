@@ -1,7 +1,7 @@
 // Stroke-only icon set. Inherits currentColor.
 import type { SVGProps } from 'react';
 
-type IconProps = SVGProps<SVGSVGElement> & { size?: number; stroke?: number };
+type IconProps = Omit<SVGProps<SVGSVGElement>, 'stroke'> & { size?: number; stroke?: number };
 
 const Icon = ({ children, size = 20, stroke = 1.5, ...rest }: IconProps & { children: React.ReactNode }) => (
   <svg
@@ -26,4 +26,5 @@ export const Icons = {
   check: (p: IconProps) => <Icon {...p}><path d="M4 12.5l4.5 4.5L20 5.5" /></Icon>,
   close: (p: IconProps) => <Icon {...p}><path d="M6 6l12 12M18 6L6 18" /></Icon>,
   menu: (p: IconProps) => <Icon {...p}><path d="M4 7h16M4 12h16M4 17h16" /></Icon>,
+  shield: (p: IconProps) => <Icon {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></Icon>,
 };

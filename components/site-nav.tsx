@@ -39,7 +39,7 @@ export function SiteNav() {
             color: 'var(--ink)',
           }}
         >
-          <Logomark size={36} stroke="var(--brand)" accent="var(--surface)" />
+          <Logomark size={36} fill="var(--brand)" glyph="var(--surface)" />
           <span
             style={{
               fontFamily: 'var(--font-display)',

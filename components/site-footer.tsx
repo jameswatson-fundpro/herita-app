@@ -41,7 +41,7 @@ export function SiteFooter() {
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-              <Logomark size={32} stroke="var(--brand)" accent="var(--surface)" />
+              <Logomark size={32} fill="var(--brand)" glyph="var(--surface)" />
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 22 }}>Herita</span>
             </div>
             <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6, maxWidth: 360 }}>
