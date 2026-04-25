@@ -1,0 +1,186 @@
+/* =========================================================================
+   Herita — Editorial Estate
+   Magazine-grade serif. Cream paper, ink, brass. Hairline rules, drop caps.
+   ========================================================================= */
+
+/* -- Fonts ------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap');
+
+/* -- Reset ------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  min-height: 100vh;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+img, svg { display: block; max-width: 100%; }
+button { font-family: inherit; }
+a { color: var(--brand); }
+
+/* -- Tokens — Light (default) ----------------------------------------- */
+:root {
+  --font-display: "Fraunces", "GT Sectra", Georgia, serif;
+  --font-body: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "Geist Mono", Menlo, monospace;
+
+  --bg: #f4efe6;
+  --surface: #fbf7ee;
+  --surface-2: #ece4d3;
+  --ink: #1d1a14;
+  --text: #2a261d;
+  --muted: #6e6354;
+  --brand: #1f3a2c;       /* forest */
+  --brand-2: #b07a3a;     /* brass */
+  --accent: #a8492a;      /* terracotta */
+  --border: rgba(40,30,20,0.12);
+  --border-strong: rgba(40,30,20,0.22);
+  --hairline: rgba(40,30,20,0.18);
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-pill: 999px;
+
+  --space-scale: 1;
+  --head-scale: 1;
+  --pad-scale: 1;
+}
+
+/* -- Tokens — Dark ----------------------------------------------------- */
+[data-theme="dark"] {
+  --bg: #16130d;
+  --surface: #1f1a12;
+  --surface-2: #2a2218;
+  --ink: #f4efe6;
+  --text: #ece4d3;
+  --muted: #9a8d77;
+  --brand: #c89968;
+  --brand-2: #d4a574;
+  --accent: #e2723f;
+  --border: rgba(232,220,200,0.14);
+  --border-strong: rgba(232,220,200,0.28);
+  --hairline: rgba(232,220,200,0.18);
+}
+
+/* -- Density ----------------------------------------------------------- */
+[data-density="compact"]     { --space-scale: 0.85; --head-scale: 0.92; --pad-scale: 0.85; }
+[data-density="comfortable"] { --space-scale: 1.00; --head-scale: 1.00; --pad-scale: 1.00; }
+[data-density="spacious"]    { --space-scale: 1.18; --head-scale: 1.10; --pad-scale: 1.18; }
+
+/* -- Typography -------------------------------------------------------- */
+h1, h2, h3, h4 { color: var(--ink); margin: 0; }
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+}
+.eyebrow-brand { color: var(--brand-2); }
+
+/* -- Buttons ----------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  transition: transform 0.12s, background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.btn:hover { transform: translateY(-1px); }
+
+.btn-primary {
+  background: var(--brand);
+  color: var(--surface);
+  border-color: var(--brand);
+}
+.btn-primary:hover { background: color-mix(in oklab, var(--brand) 88%, black); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--border-strong);
+}
+.btn-ghost:hover { background: var(--surface); }
+
+.btn-on-dark {
+  background: var(--brand-2);
+  color: var(--ink);
+  border-color: var(--brand-2);
+}
+
+/* -- Forms ------------------------------------------------------------- */
+input:focus, select:focus, textarea:focus {
+  border-color: var(--brand) !important;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--brand) 18%, transparent);
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 22px;
+  background: transparent;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  background: transparent;
+  border: none;
+}
+input[type="range"]::-moz-range-track {
+  height: 4px;
+  background: transparent;
+  border: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--brand);
+  border: 3px solid var(--surface);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  cursor: grab;
+  margin-top: -9px;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--brand);
+  border: 3px solid var(--surface);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  cursor: grab;
+}
+
+/* -- Layout helpers ---------------------------------------------------- */
+.container {
+  width: min(100% - 40px, 1180px);
+  margin: 0 auto;
+}
+.container-sm {
+  width: min(100% - 40px, 880px);
+  margin: 0 auto;
+}
+
+/* -- Responsive -------------------------------------------------------- */
+@media (max-width: 900px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
+  .hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+  .nav-links { display: none !important; }
+}
