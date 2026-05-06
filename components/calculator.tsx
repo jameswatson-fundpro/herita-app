@@ -10,6 +10,8 @@ const fmtCurrency = (n: number) =>
     maximumFractionDigits: 0,
   }).format(n);
 
+const MIN_ADVANCE = 30000;
+
 type CalcResult = {
   advance: number;
   setupFee: number;
@@ -17,6 +19,7 @@ type CalcResult = {
   totalRepay: number;
   remaining: number;
   costOfFunds: number;
+  belowMinimum: boolean;
 };
 
 function useCalc({
@@ -29,13 +32,14 @@ function useCalc({
   months: number;
 }): CalcResult {
   return useMemo(() => {
-    const pct = advancePct / 100;
-    const advance = inheritance * pct;
-    const setupFee = advance * 0.02;
+    const rawAdvance = inheritance * (advancePct / 100);
+    const belowMinimum = rawAdvance < MIN_ADVANCE;
+    const advance = Math.max(rawAdvance, MIN_ADVANCE);
+    const setupFee = Math.max(advance * 0.02, 1500);
     const interest = advance * 0.02 * months;
     const totalRepay = advance + setupFee + interest;
     const remaining = inheritance - totalRepay;
-    return { advance, setupFee, interest, totalRepay, remaining, costOfFunds: setupFee + interest };
+    return { advance, setupFee, interest, totalRepay, remaining, costOfFunds: setupFee + interest, belowMinimum };
   }, [inheritance, advancePct, months]);
 }
 
@@ -204,7 +208,7 @@ function CalcTimeline({ months, calc }: { months: number; calc: CalcResult }) {
           <div style={{ fontSize: 13, color: 'var(--muted)' }}>You receive funds</div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 12, color: 'var(--muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>At settlement · {months}mo</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Inheritance received · {months}mo</div>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 26 }}>{fmtCurrency(calc.totalRepay)}</div>
           <div style={{ fontSize: 13, color: 'var(--muted)' }}>Repaid from estate</div>
         </div>
@@ -248,7 +252,7 @@ function CalcTimeline({ months, calc }: { months: number; calc: CalcResult }) {
         })}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 20 }}>
-        <Stat label="Setup (2%)" value={fmtCurrency(calc.setupFee)} />
+        <Stat label="Setup fee" value={fmtCurrency(calc.setupFee)} />
         <Stat label="Interest" value={fmtCurrency(calc.interest)} />
         <Stat label="Remaining to you" value={fmtCurrency(calc.remaining)} accent />
       </div>
@@ -279,7 +283,7 @@ function CalcBars({ inheritance, calc }: { inheritance: number; calc: CalcResult
   const rows: [string, number, string][] = [
     ['Your inheritance', inheritance, 'var(--surface-2)'],
     ['Advance to you', calc.advance, 'var(--brand)'],
-    ['Setup fee (2%)', calc.setupFee, 'var(--brand-2)'],
+    ['Setup fee', calc.setupFee, 'var(--brand-2)'],
     ['Interest accrued', calc.interest, 'var(--brand-2)'],
     ['Total repaid at settlement', calc.totalRepay, 'var(--accent)'],
     ['Remaining to you', calc.remaining, 'var(--brand)'],
@@ -330,9 +334,9 @@ export function Calculator({
   initialViz?: Viz;
   showVizSwitcher?: boolean;
 }) {
-  const [inheritance, setInheritance] = useState(500000);
-  const [advancePct, setAdvancePct] = useState(30);
-  const [months, setMonths] = useState(9);
+  const [inheritance, setInheritance] = useState(1000000);
+  const [advancePct, setAdvancePct] = useState(10);
+  const [months, setMonths] = useState(6);
   const [viz, setViz] = useState<Viz>(initialViz);
   const calc = useCalc({ inheritance, advancePct, months });
 
@@ -343,9 +347,9 @@ export function Calculator({
     const i = Number(params.get('inheritance'));
     const p = Number(params.get('pct'));
     const m = Number(params.get('months'));
-    if (i >= 50000 && i <= 2000000) setInheritance(i);
-    if (p >= 10 && p <= 50) setAdvancePct(p);
-    if (m >= 1 && m <= 18) setMonths(m);
+    if (i >= 100000 && i <= 5000000) setInheritance(i);
+    if (p >= 1 && p <= 50) setAdvancePct(p);
+    if (m >= 1 && m <= 24) setMonths(m);
   }, [params]);
 
   const applyHref =
@@ -377,26 +381,31 @@ export function Calculator({
         <PrettySlider
           label="Your expected inheritance"
           valueLabel={fmtCurrency(inheritance)}
-          min={50000}
-          max={2000000}
-          step={25000}
+          min={100000}
+          max={5000000}
+          step={100000}
           value={inheritance}
           onChange={setInheritance}
         />
         <PrettySlider
           label="Advance percentage"
           valueLabel={`${advancePct}%`}
-          min={10}
+          min={1}
           max={50}
           step={1}
           value={advancePct}
           onChange={setAdvancePct}
         />
+        {calc.belowMinimum && (
+          <div style={{ fontSize: 13, color: 'var(--muted)', background: 'var(--surface-2)', padding: '8px 12px', borderRadius: 8, marginTop: -12, marginBottom: 20 }}>
+            Minimum advance of {fmtCurrency(MIN_ADVANCE)} applies at this combination.
+          </div>
+        )}
         <PrettySlider
-          label="Months to settlement"
+          label="Months until inheritance received"
           valueLabel={`${months} months`}
           min={1}
-          max={18}
+          max={24}
           step={1}
           value={months}
           onChange={setMonths}
