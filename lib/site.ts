@@ -9,24 +9,23 @@ export const SITE = {
   },
   hero: {
     title: 'Your inheritance,\nwhen you need it.',
-    lead: 'Estate settlement takes time. We advance funds against your confirmed inheritance — no monthly repayments, and everything settles when the estate finalises.',
+    lead: 'Estate settlement takes time. We enable early access to your confirmed inheritance — unlock funds today and repay us when the estate is finalised.',
   },
   trustKpis: [
     ['Advance up to', '50%'],
     ['Initial decision', '48 hours'],
-    ['Repayment', 'From estate only'],
-    ['Your liability', 'Capped at your share'],
+    ['Repayment', 'Direct from the estate (you make no monthly payments)'],
   ] as const,
   howItWorks: [
-    ['Tell us about the estate', 'Complete a straightforward online application — usually around 10 minutes. We ask about the estate, not your income or employment.'],
-    ['Share your documents', "Upload the estate documents you have — a Will, death certificate, or probate paperwork. We'll tell you exactly what we need."],
+    ['Tell us about the estate', 'Complete a straightforward online application — usually takes around 10 minutes. We ask about the estate, not your income or employment.'],
+    ['Share your documents', "Send us the estate documents — will, death certificate and probate paperwork. We'll tell you exactly what we need."],
     ['Receive a decision', "Our team reviews every application personally. You'll have an initial answer within 48 hours."],
-    ['Access your funds', 'Once approved, funds are transferred directly to your account the next business day.'],
+    ['Access your funds', 'Once approved (and contracts are signed), funds are transferred directly to your account the next business day.'],
   ] as const,
   whyInherit: [
-    ['Capped at your share, always', 'The total you repay will never exceed your inheritance. Non-recourse lending, secured against the estate only — your other assets are never at risk.'],
-    ['Assessed on your inheritance, not your income', "No payslips required. We assess what you're entitled to from the estate — nothing more."],
-    ['No repayments until the estate settles', 'The advance, fees, and interest are all repaid when the estate finalises. Nothing comes out of your pocket in the meantime.'],
+    ['Capped at your share, always', 'The total you repay will never exceed your inheritance. Non-recourse lending, secured against the estate.'],
+    ['Assessed on your inheritance, not your income', "No payslips required. We assess what you're entitled to from the estate."],
+    ['No repayments until the estate settles', 'The advance, fees and interest are all repaid when the estate finalises. Nothing comes out of your pocket in the meantime.'],
   ] as const,
   products: [
     {

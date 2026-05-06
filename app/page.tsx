@@ -97,7 +97,7 @@ export default function HomePage() {
         </section>
 
         {/* How it works */}
-        <Section id="how-it-works" eyebrow="The process" title="Four considered steps">
+        <Section id="how-it-works" eyebrow="The process" title="Four simple steps">
           <div className="grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 32 }}>
             {SITE.howItWorks.map(([t, d], i) => (
               <article key={t}>
@@ -128,7 +128,7 @@ export default function HomePage() {
         </Section>
 
         {/* Why */}
-        <Section eyebrow="Why families choose us" title="Built differently — by design.">
+        <Section eyebrow="Why families choose us" title="Financial support when you need it most.">
           <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 40 }}>
             {SITE.whyInherit.map(([t, d], i) => (
               <div key={t} style={{ borderLeft: '1px solid var(--hairline)', paddingLeft: 28 }}>
