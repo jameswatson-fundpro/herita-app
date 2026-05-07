@@ -219,4 +219,6 @@ input[type="range"]::-moz-range-thumb {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; }
   .hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
   .nav-links { display: none !important; }
+  /* Stepper stacks above the form on mobile — disable sticky so it doesn't cover inputs */
+  .wizard-aside { position: static !important; }
 }

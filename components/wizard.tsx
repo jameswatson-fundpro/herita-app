@@ -396,7 +396,7 @@ export function Wizard() {
       }}
     >
       {/* Stepper */}
-      <aside style={{ position: 'sticky', top: 100 }}>
+      <aside className="wizard-aside" style={{ position: 'sticky', top: 100 }}>
         <div className="eyebrow" style={{ marginBottom: 8 }}>
           Application · Step {stepIdx + 1} of {STEPS.length}
         </div>
