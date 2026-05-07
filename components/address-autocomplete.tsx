@@ -142,7 +142,7 @@ export function AddressAutocomplete({
         onFocus={handleFocus}
         placeholder={placeholder}
         required={required}
-        autoComplete="street-address"
+        autoComplete="off"
         style={inputStyle}
       />
       {!apiKey && (
