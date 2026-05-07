@@ -1,85 +1,19 @@
 'use client';
 
-/**
- * AddressAutocomplete
- * ────────────────────────────────────────────────────────────────────
- * Single-input address field powered by the Google Places Autocomplete
- * (legacy JS API — works with the standard "Maps JavaScript API" + Places
- * library). Loads the Google script lazily on first focus so the page
- * isn't billed for users who never reach this field.
- *
- * Setup
- *   1. Add to .env.local:           NEXT_PUBLIC_GOOGLE_PLACES_KEY=...
- *   2. In Google Cloud Console:     enable "Maps JavaScript API"
- *                                   enable "Places API"
- *                                   restrict the key to your domain
- *
- * The component falls back gracefully (plain input) if the key is missing
- * or the script fails — the user can still type an address by hand.
- */
+import { useEffect, useRef, useState } from 'react';
 
-import { useEffect, useId, useRef, useState } from 'react';
-
-// Minimal types — we don't pull the full @types/google.maps package.
-type GooglePlace = {
-  formatted_address?: string;
-  address_components?: Array<{
-    long_name: string;
-    short_name: string;
-    types: string[];
-  }>;
+type Prediction = {
+  place_id: string;
+  description: string;
+  structured_formatting?: { main_text: string; secondary_text: string };
 };
-
-type GoogleAutocomplete = {
-  addListener: (event: string, fn: () => void) => void;
-  getPlace: () => GooglePlace;
-  setComponentRestrictions: (r: { country: string[] }) => void;
-};
-
-declare global {
-  interface Window {
-    google?: {
-      maps?: {
-        places?: {
-          Autocomplete: new (
-            input: HTMLInputElement,
-            opts?: Record<string, unknown>,
-          ) => GoogleAutocomplete;
-        };
-      };
-    };
-    __heritaGoogleMapsLoading?: Promise<void>;
-  }
-}
-
-function loadGoogleMaps(apiKey: string): Promise<void> {
-  if (typeof window === 'undefined') return Promise.resolve();
-  if (window.google?.maps?.places) return Promise.resolve();
-  if (window.__heritaGoogleMapsLoading) return window.__heritaGoogleMapsLoading;
-
-  window.__heritaGoogleMapsLoading = new Promise<void>((resolve, reject) => {
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Google Maps'));
-    document.head.appendChild(script);
-  });
-
-  return window.__heritaGoogleMapsLoading;
-}
 
 export type AddressAutocompleteProps = {
   value: string;
-  onChange: (value: string, components?: GooglePlace) => void;
+  onChange: (value: string) => void;
   placeholder?: string;
   required?: boolean;
   inputStyle?: React.CSSProperties;
-  /**
-   * Restrict suggestions to these ISO country codes. Default: AU + NZ + GB
-   * (matches the Estate location options).
-   */
   countries?: string[];
 };
 
@@ -89,77 +23,120 @@ export function AddressAutocomplete({
   placeholder = 'Start typing your address',
   required,
   inputStyle,
-  countries = ['au', 'nz', 'gb'],
 }: AddressAutocompleteProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const acRef = useRef<GoogleAutocomplete | null>(null);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
-  const id = useId();
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [open, setOpen] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(-1);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_PLACES_KEY;
-
-  // Lazy-load the script on first focus.
-  const handleFocus = async () => {
-    if (status !== 'idle' || !apiKey || !inputRef.current) return;
-    setStatus('loading');
-    try {
-      await loadGoogleMaps(apiKey);
-      if (!inputRef.current || !window.google?.maps?.places) {
-        setStatus('error');
-        return;
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (!value || value.length < 3) {
+      setPredictions([]);
+      setOpen(false);
+      return;
+    }
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/places?input=${encodeURIComponent(value)}`);
+        const data = (await res.json()) as { predictions: Prediction[] };
+        const preds = data.predictions || [];
+        setPredictions(preds);
+        setOpen(preds.length > 0);
+        setActiveIdx(-1);
+      } catch {
+        setPredictions([]);
+        setOpen(false);
       }
-      const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
-        fields: ['formatted_address', 'address_components'],
-        types: ['address'],
-        componentRestrictions: { country: countries },
-      });
-      ac.addListener('place_changed', () => {
-        const place = ac.getPlace();
-        const formatted = place.formatted_address || inputRef.current?.value || '';
-        onChange(formatted, place);
-      });
-      acRef.current = ac;
-      setStatus('ready');
-    } catch {
-      setStatus('error');
+    }, 300);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [value]);
+
+  useEffect(() => {
+    const handle = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, []);
+
+  const select = (description: string) => {
+    onChange(description);
+    setOpen(false);
+    setPredictions([]);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!open || predictions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIdx((i) => Math.min(i + 1, predictions.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIdx((i) => Math.max(i - 1, 0));
+    } else if (e.key === 'Enter' && activeIdx >= 0) {
+      e.preventDefault();
+      select(predictions[activeIdx].description);
+    } else if (e.key === 'Escape') {
+      setOpen(false);
     }
   };
 
-  // Defensive: clean up the pac-container Google injects on body
-  useEffect(() => {
-    return () => {
-      document.querySelectorAll('.pac-container').forEach((el) => el.remove());
-    };
-  }, []);
-
   return (
-    <div style={{ position: 'relative' }}>
+    <div ref={containerRef} style={{ position: 'relative' }}>
       <input
-        ref={inputRef}
-        id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onFocus={handleFocus}
+        onKeyDown={handleKeyDown}
         placeholder={placeholder}
         required={required}
         autoComplete="off"
         style={inputStyle}
       />
-      {!apiKey && (
+      {open && predictions.length > 0 && (
         <div
           style={{
-            fontSize: 12,
-            color: 'var(--muted)',
-            marginTop: 6,
-            fontStyle: 'italic',
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            marginTop: 4,
+            background: 'var(--surface)',
+            border: '1px solid var(--border-strong)',
+            borderRadius: 'var(--radius-lg)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+            zIndex: 9999,
+            overflow: 'hidden',
           }}
         >
-          Address autocomplete unavailable — set NEXT_PUBLIC_GOOGLE_PLACES_KEY to enable.
-        </div>
-      )}
-      {status === 'error' && (
-        <div style={{ fontSize: 12, color: 'var(--accent)', marginTop: 6 }}>
-          Address suggestions unavailable — please type your address.
+          {predictions.map((p, i) => (
+            <div
+              key={p.place_id}
+              onMouseDown={() => select(p.description)}
+              style={{
+                padding: '10px 14px',
+                cursor: 'pointer',
+                fontSize: 14,
+                lineHeight: 1.4,
+                borderTop: i === 0 ? 'none' : '1px solid var(--hairline)',
+                background: i === activeIdx ? 'var(--surface-2)' : 'transparent',
+              }}
+            >
+              <span style={{ fontWeight: 500, color: 'var(--ink)' }}>
+                {p.structured_formatting?.main_text ?? p.description.split(',')[0]}
+              </span>
+              {p.structured_formatting?.secondary_text && (
+                <span style={{ color: 'var(--muted)', marginLeft: 6, fontSize: 13 }}>
+                  {p.structured_formatting.secondary_text}
+                </span>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
