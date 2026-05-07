@@ -59,7 +59,7 @@ function loadGoogleMaps(apiKey: string): Promise<void> {
 
   window.__heritaGoogleMapsLoading = new Promise<void>((resolve, reject) => {
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places&loading=async`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&libraries=places`;
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();
