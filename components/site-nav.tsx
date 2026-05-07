@@ -96,7 +96,7 @@ export function SiteNav() {
             {theme === 'dark' ? '☀' : '☾'}
           </button>
           <Link href="/apply" className="btn btn-primary">
-            Begin application
+            Apply Now
           </Link>
         </nav>
 
@@ -124,7 +124,7 @@ export function SiteNav() {
         <div
           className="container"
           style={{
-            display: 'none',
+            display: 'flex',
             paddingTop: 16,
             paddingBottom: 16,
             flexDirection: 'column',
@@ -142,7 +142,7 @@ export function SiteNav() {
             </Link>
           ))}
           <Link href="/apply" className="btn btn-primary" onClick={() => setOpen(false)}>
-            Begin application
+            Apply Now
           </Link>
         </div>
       )}
