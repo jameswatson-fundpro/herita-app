@@ -18,6 +18,8 @@ export async function GET(req: NextRequest) {
 
   const res = await fetch(url.toString());
   const data = (await res.json()) as {
+    status?: string;
+    error_message?: string;
     predictions?: Array<{
       place_id: string;
       description: string;
@@ -25,5 +27,9 @@ export async function GET(req: NextRequest) {
     }>;
   };
 
-  return NextResponse.json({ predictions: data.predictions || [] });
+  return NextResponse.json({
+    predictions: data.predictions || [],
+    status: data.status,
+    error_message: data.error_message,
+  });
 }
