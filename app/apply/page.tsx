@@ -16,10 +16,10 @@ export default function ApplyPage() {
               <div>
                 <div className="eyebrow eyebrow-brand">Apply</div>
                 <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 400, fontSize: 'clamp(44px, 6vw, 72px)', lineHeight: 1, margin: '12px 0 20px', letterSpacing: '-0.01em' }}>
-                  A short, <em style={{ color: 'var(--brand)' }}>considered</em> conversation. Then we take it from here.
+                  A short, considered application.
                 </h1>
                 <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, lineHeight: 1.55, color: 'var(--text)', maxWidth: 600, margin: 0 }}>
-                  Around ten minutes, six steps, no payslips. We ask about the estate and your role within it — that&rsquo;s how we assess every application.
+                  Around five minutes, three steps, no payslips. We ask about you, the estate and your role within it — that&rsquo;s how we assess every application.
                 </p>
               </div>
               <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>

@@ -1,18 +1,16 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { AddressAutocomplete } from './address-autocomplete';
 
 const STEPS = [
-  { id: 'product', title: 'Product & amount', desc: 'What you need from us' },
-  { id: 'applicant', title: 'About you', desc: 'Identity and contact' },
-  { id: 'estate', title: 'The estate', desc: 'Probate and entitlement' },
-  { id: 'financial', title: 'Funding context', desc: 'Urgency and credit' },
-  { id: 'documents', title: 'Documents', desc: 'Evidence and consent' },
-  { id: 'review', title: 'Review', desc: 'Confirm & submit' },
+  { id: 'applicant', title: 'About you', desc: '' },
+  { id: 'estate', title: 'The estate', desc: 'Probate, executor and lawyer' },
+  { id: 'loan', title: 'Your loan request', desc: 'Amount, purpose and history' },
 ] as const;
 
-const URGENT_COSTS = [
+const USE_OF_FUNDS = [
   'Funeral expenses',
   'Legal fees',
   'Probate costs',
@@ -20,79 +18,71 @@ const URGENT_COSTS = [
   'Rates or utilities',
   'Debt consolidation',
   'Living expenses',
+  'Other',
 ];
-const DOCUMENTS = [
-  'Will',
-  'Death certificate',
-  'Grant of probate',
-  'Estate asset schedule',
-  'Executor ID',
-  'Beneficiary ID',
-  'Property sale contract',
+
+const ESTATE_LOCATIONS = [
+  { group: 'Australia', options: ['NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'] },
+  { group: 'Other', options: ['New Zealand', 'United Kingdom', 'Other Overseas'] },
 ];
 
 export type WizardForm = {
-  product: 'inheritance-advance' | 'executor-loan';
-  purpose: string;
-  estimatedAmount: string;
-  title: string;
+  // Section 1 — About you
   firstName: string;
   lastName: string;
-  dateOfBirth: string;
   email: string;
   phone: string;
-  residentialAddress: string;
-  city: string;
-  state: string;
-  postcode: string;
+  address: string;
+  consentElectronic: boolean;
+  consentPrivacy: boolean;
+
+  // Section 2 — The estate
   applicantRole: string;
   relationshipToDeceased: string;
   deceasedName: string;
   probateStatus: string;
-  estateValue: string;
-  inheritanceShare: string;
+  estateLocation: string;
   executorName: string;
-  executorContact: string;
-  propertyInEstate: string;
-  urgentCosts: string[];
-  bankruptcyHistory: string;
-  documentsAvailable: string[];
+  executorEmail: string;
+  executorPhone: string;
+  lawyerName: string;
+  lawyerEmail: string;
+  lawyerPhone: string;
+
+  // Section 3 — Loan request
+  estimatedAmount: string;
+  useOfFunds: string[];
+  useOfFundsOther: string;
+  priorCreditIssues: string;
   additionalNotes: string;
-  consentPrivacy: boolean;
-  consentCredit: boolean;
-  consentCommunication: boolean;
 };
 
 const initialForm: WizardForm = {
-  product: 'inheritance-advance',
-  purpose: '',
-  estimatedAmount: '',
-  title: '',
   firstName: '',
   lastName: '',
-  dateOfBirth: '',
   email: '',
   phone: '',
-  residentialAddress: '',
-  city: '',
-  state: 'NSW',
-  postcode: '',
+  address: '',
+  consentElectronic: false,
+  consentPrivacy: false,
+
   applicantRole: 'beneficiary',
   relationshipToDeceased: '',
   deceasedName: '',
   probateStatus: 'not-started',
-  estateValue: '',
-  inheritanceShare: '',
+  estateLocation: 'NSW',
   executorName: '',
-  executorContact: '',
-  propertyInEstate: 'unknown',
-  urgentCosts: [],
-  bankruptcyHistory: 'no',
-  documentsAvailable: [],
+  executorEmail: '',
+  executorPhone: '',
+  lawyerName: '',
+  lawyerEmail: '',
+  lawyerPhone: '',
+
+  estimatedAmount: '',
+  useOfFunds: [],
+  useOfFundsOther: '',
+  priorCreditIssues: 'no',
   additionalNotes: '',
-  consentPrivacy: false,
-  consentCredit: false,
-  consentCommunication: false,
 };
 
 const inputStyle: React.CSSProperties = {
@@ -113,9 +103,12 @@ export function Wizard() {
   const [form, setForm] = useState<WizardForm>(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState<{ ok: boolean; ref?: string; error?: string } | null>(null);
+  const [stepError, setStepError] = useState<string | null>(null);
+  const [savingStep, setSavingStep] = useState(false);
+  const applicationIdRef = useRef<string | null>(null);
 
   const params = useSearchParams();
-  // Prefill from /apply?inheritance=...&pct=...&months=...
+  // Prefill amount from /apply?inheritance=...&pct=...
   useEffect(() => {
     if (!params) return;
     const inh = params.get('inheritance');
@@ -127,8 +120,6 @@ export function Wizard() {
         const requested = Math.round(inhN * (pctN / 100));
         setForm((f) => ({
           ...f,
-          estateValue: f.estateValue || inhN.toLocaleString('en-AU'),
-          inheritanceShare: f.inheritanceShare || inhN.toLocaleString('en-AU'),
           estimatedAmount: f.estimatedAmount || requested.toLocaleString('en-AU'),
         }));
       }
@@ -145,14 +136,14 @@ export function Wizard() {
       setForm((f) => ({ ...f, [k]: v as WizardForm[K] }));
     };
 
-  const setMulti = (k: 'urgentCosts' | 'documentsAvailable', v: string) =>
+  const setMulti = (k: 'useOfFunds', v: string) =>
     setForm((f) => ({
       ...f,
       [k]: f[k].includes(v) ? f[k].filter((x) => x !== v) : [...f[k], v],
     }));
 
   const setCurrency =
-    (k: 'estimatedAmount' | 'estateValue' | 'inheritanceShare') =>
+    (k: 'estimatedAmount') =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const raw = e.target.value.replace(/[^\d]/g, '');
       setForm((f) => ({
@@ -161,17 +152,106 @@ export function Wizard() {
       }));
     };
 
+  // ── Validation per step ─────────────────────────────────────────────
+  const validateStep = (idx: number): string | null => {
+    if (idx === 0) {
+      if (!form.firstName.trim()) return 'First name is required.';
+      if (!form.lastName.trim()) return 'Last name is required.';
+      if (!form.email.trim() || !/.+@.+\..+/.test(form.email)) return 'A valid email is required.';
+      if (!form.phone.trim()) return 'Phone is required.';
+      if (!form.address.trim()) return 'Address is required.';
+      if (!form.consentElectronic) return 'Please consent to electronic communications.';
+      if (!form.consentPrivacy) return 'Please consent to the Privacy Consent Form.';
+    }
+    if (idx === 1) {
+      if (!form.applicantRole) return 'Please select your role.';
+      if (!form.deceasedName.trim()) return 'Deceased name is required.';
+      if (!form.probateStatus) return 'Please select probate status.';
+      if (!form.estateLocation) return 'Please select estate location.';
+    }
+    if (idx === 2) {
+      if (!form.estimatedAmount.trim()) return 'Please enter the amount you want to borrow.';
+    }
+    return null;
+  };
+
+  // ── Per-step partial save ───────────────────────────────────────────
+  const saveStep = async (idx: number): Promise<boolean> => {
+    setSavingStep(true);
+    setStepError(null);
+    try {
+      const res = await fetch('/api/apply', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          ...form,
+          step: STEPS[idx].id,
+          stepIndex: idx,
+          partial: idx < STEPS.length - 1,
+          applicationId: applicationIdRef.current,
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        ref?: string;
+        applicationId?: string;
+        error?: string;
+      };
+      if (!res.ok || !data.ok) {
+        setStepError(data.error || `Server returned ${res.status}`);
+        return false;
+      }
+      if (data.applicationId && !applicationIdRef.current) {
+        applicationIdRef.current = data.applicationId;
+      }
+      return true;
+    } catch (err) {
+      setStepError(err instanceof Error ? err.message : 'Network error');
+      return false;
+    } finally {
+      setSavingStep(false);
+    }
+  };
+
+  const goNext = async () => {
+    const v = validateStep(stepIdx);
+    if (v) {
+      setStepError(v);
+      return;
+    }
+    const ok = await saveStep(stepIdx);
+    if (!ok) return;
+    setStepError(null);
+    setStepIdx((i) => Math.min(STEPS.length - 1, i + 1));
+  };
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    const v = validateStep(stepIdx);
+    if (v) {
+      setStepError(v);
+      return;
+    }
     setSubmitting(true);
     setSubmitted(null);
     try {
       const res = await fetch('/api/apply', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          step: 'final',
+          stepIndex: STEPS.length - 1,
+          partial: false,
+          applicationId: applicationIdRef.current,
+        }),
       });
-      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; ref?: string; error?: string };
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        ref?: string;
+        applicationId?: string;
+        error?: string;
+      };
       if (!res.ok || !data.ok) {
         setSubmitted({ ok: false, error: data.error || `Server returned ${res.status}` });
       } else {
@@ -214,7 +294,7 @@ export function Wizard() {
           Thank you. We&rsquo;ll be in touch.
         </h2>
         <p style={{ color: 'var(--muted)', lineHeight: 1.6, fontSize: 16, maxWidth: 540, margin: '0 auto 20px' }}>
-          A specialist will review your application and reply within one business day, often sooner. A confirmation has been sent to {form.email || 'your email'}.
+          A specialist will be in contact within one business day, often sooner. A confirmation has been sent to {form.email || 'your email'}.
         </p>
         {submitted.ref && (
           <div
@@ -231,6 +311,75 @@ export function Wizard() {
             Reference: <strong style={{ color: 'var(--ink)' }}>{submitted.ref}</strong>
           </div>
         )}
+        <div
+          style={{
+            marginTop: 36,
+            paddingTop: 24,
+            borderTop: '1px solid var(--hairline)',
+            textAlign: 'left',
+            maxWidth: 540,
+            marginLeft: 'auto',
+            marginRight: 'auto',
+          }}
+        >
+          <div className="eyebrow eyebrow-brand" style={{ marginBottom: 10 }}>While you wait</div>
+          <h3
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 500,
+              fontSize: 22,
+              margin: '0 0 10px',
+              lineHeight: 1.2,
+            }}
+          >
+            You can start compiling the documents we&rsquo;ll need.
+          </h3>
+          <p style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.6, margin: '0 0 14px' }}>
+            No need to send anything yet &mdash; your specialist will guide you. Having these to hand will speed things up:
+          </p>
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+            {[
+              'ID for the borrower',
+              'Copy of the Will',
+              'Copy of the Death Certificate',
+              'Evidence of estate assets and liabilities',
+            ].map((d) => (
+              <li
+                key={d}
+                style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 12,
+                  padding: '10px 0',
+                  borderTop: '1px solid var(--hairline)',
+                  fontSize: 15,
+                  color: 'var(--text)',
+                }}
+              >
+                <span
+                  aria-hidden
+                  style={{
+                    flex: '0 0 auto',
+                    width: 22,
+                    height: 22,
+                    borderRadius: 999,
+                    background: 'color-mix(in oklab, var(--brand) 12%, var(--surface))',
+                    color: 'var(--brand)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    marginTop: 1,
+                  }}
+                >
+                  ✓
+                </span>
+                {d}
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     );
   }
@@ -366,91 +515,52 @@ export function Wizard() {
           <p style={{ color: 'var(--muted)', margin: 0 }}>{step.desc}.</p>
         </div>
 
-        {step.id === 'product' && (
-          <>
-            <FieldLabel>Which product fits?</FieldLabel>
-            <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-              <RadioCard
-                checked={form.product === 'inheritance-advance'}
-                onClick={() => setForm((f) => ({ ...f, product: 'inheritance-advance' }))}
-                title="Inheritance Advance"
-                desc="For beneficiaries — advance up to 50% of your share."
-              />
-              <RadioCard
-                checked={form.product === 'executor-loan'}
-                onClick={() => setForm((f) => ({ ...f, product: 'executor-loan' }))}
-                title="Executor Estate Loan"
-                desc="For executors — fund administration costs from the estate."
-              />
-            </div>
-            <Field label="What will the funds be used for?" hint="One sentence is fine.">
-              <input
-                value={form.purpose}
-                onChange={set('purpose')}
-                placeholder="e.g. Living costs while probate proceeds"
-                style={inputStyle}
-              />
-            </Field>
-            <Field label="Approximate amount you need" hint="A round figure — we refine this in the conversation that follows.">
-              <PrefixedInput value={form.estimatedAmount} onChange={setCurrency('estimatedAmount')} placeholder="75,000" />
-            </Field>
-          </>
-        )}
-
+        {/* ── Section 1 — About you ───────────────────────────────── */}
         {step.id === 'applicant' && (
           <>
-            <Row3>
-              <Field label="Title">
-                <select value={form.title} onChange={set('title')} style={inputStyle}>
-                  <option value="">Select</option>
-                  {['Mr', 'Mrs', 'Ms', 'Dr', 'Other'].map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="First name">
+            <Row2>
+              <Field label="First name" required>
                 <input value={form.firstName} onChange={set('firstName')} placeholder="Jane" style={inputStyle} required />
               </Field>
-              <Field label="Last name">
+              <Field label="Last name" required>
                 <input value={form.lastName} onChange={set('lastName')} placeholder="Citizen" style={inputStyle} required />
               </Field>
-            </Row3>
-            <Row3>
-              <Field label="Date of birth">
-                <input type="date" value={form.dateOfBirth} onChange={set('dateOfBirth')} style={inputStyle} />
-              </Field>
-              <Field label="Email">
+            </Row2>
+            <Row2>
+              <Field label="Email" required>
                 <input type="email" value={form.email} onChange={set('email')} placeholder="jane@example.com" style={inputStyle} required />
               </Field>
-              <Field label="Phone">
+              <Field label="Phone" required>
                 <input value={form.phone} onChange={set('phone')} placeholder="0400 000 000" style={inputStyle} required />
               </Field>
-            </Row3>
-            <Field label="Residential address">
-              <input value={form.residentialAddress} onChange={set('residentialAddress')} placeholder="1 Example Street" style={inputStyle} />
+            </Row2>
+            <Field label="Address" required>
+              <AddressAutocomplete
+                value={form.address}
+                onChange={(v) => setForm((f) => ({ ...f, address: v }))}
+                placeholder="1 Example Street, Sydney NSW 2000"
+                inputStyle={inputStyle}
+                required
+              />
             </Field>
-            <Row3>
-              <Field label="Suburb / city">
-                <input value={form.city} onChange={set('city')} placeholder="Sydney" style={inputStyle} />
-              </Field>
-              <Field label="State">
-                <select value={form.state} onChange={set('state')} style={inputStyle}>
-                  {['NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'].map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </Field>
-              <Field label="Postcode">
-                <input value={form.postcode} onChange={set('postcode')} placeholder="2000" style={inputStyle} />
-              </Field>
-            </Row3>
+
+            <div style={{ borderTop: '1px solid var(--hairline)', paddingTop: 20, marginTop: 20 }}>
+              <FieldLabel>Consents</FieldLabel>
+              <ConsentRow checked={form.consentElectronic} onChange={set('consentElectronic')}>
+                I consent to receiving notices, statements, disclosures and other documents from Trivaro electronically using the email address provided above. I must check my email account regularly for electronic communications from Herita.
+              </ConsentRow>
+              <ConsentRow checked={form.consentPrivacy} onChange={set('consentPrivacy')}>
+                I have read and agree to Trivaro&rsquo;s <a href="/legal/privacy" target="_blank" rel="noreferrer" style={{ color: 'var(--brand)' }}>Privacy Consent Form</a> and consent to the collection, use, holding and disclosure of my personal information as set out in that document.
+              </ConsentRow>
+            </div>
           </>
         )}
 
+        {/* ── Section 2 — The estate ─────────────────────────────── */}
         {step.id === 'estate' && (
           <>
             <Row2>
-              <Field label="Your role">
+              <Field label="Your role" required>
                 <select value={form.applicantRole} onChange={set('applicantRole')} style={inputStyle}>
                   <option value="beneficiary">Beneficiary</option>
                   <option value="executor">Executor</option>
@@ -463,132 +573,106 @@ export function Wizard() {
               </Field>
             </Row2>
             <Row2>
-              <Field label="Full name of the deceased">
-                <input value={form.deceasedName} onChange={set('deceasedName')} placeholder="Alex Citizen" style={inputStyle} />
+              <Field label="Full name of the deceased" required>
+                <input value={form.deceasedName} onChange={set('deceasedName')} placeholder="Alex Citizen" style={inputStyle} required />
               </Field>
-              <Field label="Probate status">
+              <Field label="Probate status" required>
                 <select value={form.probateStatus} onChange={set('probateStatus')} style={inputStyle}>
-                  <option value="not-started">Not started</option>
-                  <option value="with-solicitor">In progress with solicitor</option>
-                  <option value="filed">Filed</option>
-                  <option value="granted">Granted</option>
-                  <option value="estate-administered">Estate being administered</option>
+                  <option value="not-started">Process has not started</option>
+                  <option value="solicitor-working">Application will be filed soon (solicitor is working on it)</option>
+                  <option value="filed">Application has been filed</option>
+                  <option value="granted">Probate has been granted</option>
                   <option value="unsure">Unsure</option>
                 </select>
               </Field>
             </Row2>
-            <Row2>
-              <Field label="Estimated estate value">
-                <PrefixedInput value={form.estateValue} onChange={setCurrency('estateValue')} placeholder="1,200,000" />
+            <Field label="Estate location" hint="Where the estate is being administered." required>
+              <select value={form.estateLocation} onChange={set('estateLocation')} style={inputStyle}>
+                {ESTATE_LOCATIONS.map((g) => (
+                  <optgroup key={g.group} label={g.group}>
+                    {g.options.map((o) => (
+                      <option key={o} value={o}>{o}</option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </Field>
+
+            <div style={{ borderTop: '1px solid var(--hairline)', paddingTop: 20, marginTop: 8 }}>
+              <FieldLabel>Executor details</FieldLabel>
+              <Field label="Name">
+                <input value={form.executorName} onChange={set('executorName')} placeholder="Executor name" style={inputStyle} />
               </Field>
-              <Field label={form.product === 'executor-loan' ? 'Requested estate facility' : 'Your expected share'}>
-                <PrefixedInput value={form.inheritanceShare} onChange={setCurrency('inheritanceShare')} placeholder="250,000" />
+              <Row2>
+                <Field label="Email">
+                  <input type="email" value={form.executorEmail} onChange={set('executorEmail')} placeholder="executor@example.com" style={inputStyle} />
+                </Field>
+                <Field label="Phone">
+                  <input value={form.executorPhone} onChange={set('executorPhone')} placeholder="0400 000 000" style={inputStyle} />
+                </Field>
+              </Row2>
+            </div>
+
+            <div style={{ borderTop: '1px solid var(--hairline)', paddingTop: 20, marginTop: 8 }}>
+              <FieldLabel>Estate lawyer details</FieldLabel>
+              <Field label="Lawyer name">
+                <input value={form.lawyerName} onChange={set('lawyerName')} placeholder="Sam Solicitor" style={inputStyle} />
               </Field>
-            </Row2>
-            <Row2>
-              <Field label="Executor / solicitor name (optional)">
-                <input value={form.executorName} onChange={set('executorName')} placeholder="Executor or law firm" style={inputStyle} />
-              </Field>
-              <Field label="Executor email (optional)">
-                <input type="email" value={form.executorContact} onChange={set('executorContact')} placeholder="executor@example.com" style={inputStyle} />
-              </Field>
-            </Row2>
+              <Row2>
+                <Field label="Email">
+                  <input type="email" value={form.lawyerEmail} onChange={set('lawyerEmail')} placeholder="lawyer@example.com" style={inputStyle} />
+                </Field>
+                <Field label="Phone">
+                  <input value={form.lawyerPhone} onChange={set('lawyerPhone')} placeholder="(02) 0000 0000" style={inputStyle} />
+                </Field>
+              </Row2>
+            </div>
           </>
         )}
 
-        {step.id === 'financial' && (
+        {/* ── Section 3 — Loan request ───────────────────────────── */}
+        {step.id === 'loan' && (
           <>
-            <Field label="Which costs are most urgent?" hint="Select any that apply.">
+            <Field label="How much do you want to borrow?" required>
+              <PrefixedInput value={form.estimatedAmount} onChange={setCurrency('estimatedAmount')} placeholder="75,000" />
+            </Field>
+            <Field label="How do you intend to use your Inheritance Advance?" hint="Select all that apply.">
               <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 10 }}>
-                {URGENT_COSTS.map((o) => (
-                  <PillCheck key={o} label={o} checked={form.urgentCosts.includes(o)} onChange={() => setMulti('urgentCosts', o)} />
+                {USE_OF_FUNDS.map((o) => (
+                  <PillCheck key={o} label={o} checked={form.useOfFunds.includes(o)} onChange={() => setMulti('useOfFunds', o)} />
                 ))}
               </div>
+              {form.useOfFunds.includes('Other') && (
+                <div style={{ marginTop: 12 }}>
+                  <input
+                    value={form.useOfFundsOther}
+                    onChange={set('useOfFundsOther')}
+                    placeholder="Please specify"
+                    style={inputStyle}
+                  />
+                </div>
+              )}
             </Field>
-            <Field label="Any prior credit issues?">
-              <select value={form.bankruptcyHistory} onChange={set('bankruptcyHistory')} style={inputStyle}>
+            <Field
+              label="Do you have any prior credit issues that we should know about?"
+              hint="Prior credit issues do not automatically disqualify you."
+            >
+              <select value={form.priorCreditIssues} onChange={set('priorCreditIssues')} style={inputStyle}>
                 <option value="no">No</option>
                 <option value="yes">Yes</option>
                 <option value="unsure">Unsure</option>
               </select>
             </Field>
-          </>
-        )}
-
-        {step.id === 'documents' && (
-          <>
-            <Field label="Which documents can you provide today?" hint="Tick anything you have to hand. Missing items are fine — we'll guide you.">
-              <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 10 }}>
-                {DOCUMENTS.map((o) => (
-                  <PillCheck key={o} label={o} checked={form.documentsAvailable.includes(o)} onChange={() => setMulti('documentsAvailable', o)} />
-                ))}
-              </div>
-            </Field>
-            <Field label="Anything else you'd like to tell us?">
+            <Field label="Any other information you would like to share?">
               <textarea
-                rows={4}
+                rows={5}
                 value={form.additionalNotes}
                 onChange={set('additionalNotes')}
                 placeholder="Disputes, caveats, expected property sale dates — anything relevant."
                 style={inputStyle}
               />
             </Field>
-            <div style={{ borderTop: '1px solid var(--hairline)', paddingTop: 20, marginTop: 8 }}>
-              <FieldLabel>Consents</FieldLabel>
-              <ConsentRow checked={form.consentPrivacy} onChange={set('consentPrivacy')}>
-                I consent to the collection and use of my information to assess this application.
-              </ConsentRow>
-              <ConsentRow checked={form.consentCredit} onChange={set('consentCredit')}>
-                I authorise Herita to verify estate and identity information.
-              </ConsentRow>
-              <ConsentRow checked={form.consentCommunication} onChange={set('consentCommunication')}>
-                I agree to receive updates by email and phone about this application.
-              </ConsentRow>
-            </div>
-          </>
-        )}
 
-        {step.id === 'review' && (
-          <>
-            <ReviewBlock
-              heading="Product"
-              rows={[
-                ['Product', form.product === 'inheritance-advance' ? 'Inheritance Advance' : 'Executor Estate Loan'],
-                ['Requested', form.estimatedAmount ? `$${form.estimatedAmount}` : '—'],
-                ['Purpose', form.purpose || '—'],
-              ]}
-            />
-            <ReviewBlock
-              heading="Applicant"
-              rows={[
-                ['Name', [form.title, form.firstName, form.lastName].filter(Boolean).join(' ') || '—'],
-                ['Email', form.email || '—'],
-                ['Phone', form.phone || '—'],
-              ]}
-            />
-            <ReviewBlock
-              heading="Estate"
-              rows={[
-                ['Deceased', form.deceasedName || '—'],
-                ['Probate', form.probateStatus],
-                ['Estate value', form.estateValue ? `$${form.estateValue}` : '—'],
-                ['Your share', form.inheritanceShare ? `$${form.inheritanceShare}` : '—'],
-              ]}
-            />
-            <div
-              style={{
-                padding: 16,
-                borderRadius: 'var(--radius-lg)',
-                background: 'color-mix(in oklab, var(--brand-2) 10%, var(--surface))',
-                border: '1px solid var(--border)',
-                marginTop: 16,
-                fontSize: 14,
-                color: 'var(--text)',
-              }}
-            >
-              <strong style={{ display: 'block', marginBottom: 4 }}>What happens next</strong>
-              A specialist reviews your file and replies within one business day with an indicative offer.
-            </div>
             {submitted && !submitted.ok && (
               <div
                 role="alert"
@@ -608,37 +692,51 @@ export function Wizard() {
           </>
         )}
 
+        {/* ── Step error ─────────────────────────────────────────── */}
+        {stepError && (
+          <div
+            role="alert"
+            style={{
+              marginTop: 16,
+              padding: 12,
+              borderRadius: 'var(--radius-md)',
+              background: 'color-mix(in oklab, var(--accent) 14%, var(--surface))',
+              border: '1px solid var(--accent)',
+              fontSize: 14,
+              color: 'var(--ink)',
+            }}
+          >
+            {stepError}
+          </div>
+        )}
+
+        {/* ── Footer nav ─────────────────────────────────────────── */}
         <div
           style={{
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
             alignItems: 'center',
-            gap: 12,
+            gap: 8,
             marginTop: 32,
             paddingTop: 20,
             borderTop: '1px solid var(--hairline)',
             flexWrap: 'wrap',
           }}
         >
-          <button type="button" className="btn btn-ghost" disabled>
-            Save draft
-          </button>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {stepIdx > 0 && (
-              <button type="button" className="btn btn-ghost" onClick={() => setStepIdx((i) => i - 1)} disabled={submitting}>
-                ← Back
-              </button>
-            )}
-            {stepIdx < STEPS.length - 1 ? (
-              <button type="button" className="btn btn-primary" onClick={() => setStepIdx((i) => i + 1)}>
-                Continue →
-              </button>
-            ) : (
-              <button type="submit" className="btn btn-primary" disabled={submitting}>
-                {submitting ? 'Submitting…' : 'Submit application'}
-              </button>
-            )}
-          </div>
+          {stepIdx > 0 && (
+            <button type="button" className="btn btn-ghost" onClick={() => setStepIdx((i) => i - 1)} disabled={submitting || savingStep}>
+              ← Back
+            </button>
+          )}
+          {stepIdx < STEPS.length - 1 ? (
+            <button type="button" className="btn btn-primary" onClick={goNext} disabled={savingStep}>
+              {savingStep ? 'Saving…' : 'Continue →'}
+            </button>
+          ) : (
+            <button type="submit" className="btn btn-primary" disabled={submitting}>
+              {submitting ? 'Submitting…' : 'Submit application'}
+            </button>
+          )}
         </div>
       </div>
     </form>
@@ -683,11 +781,14 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
   return <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 8, color: 'var(--ink)' }}>{children}</div>;
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Field({ label, hint, required, children }: { label: string; hint?: string; required?: boolean; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 20 }}>
-      <FieldLabel>{label}</FieldLabel>
-      {hint && <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: -4, marginBottom: 8 }}>{hint}</div>}
+      <FieldLabel>
+        {label}
+        {required && <span style={{ color: 'var(--accent)', marginLeft: 4 }} aria-hidden>*</span>}
+      </FieldLabel>
+      {hint && <div style={{ fontSize: 13, color: 'var(--muted)', fontStyle: 'italic', marginTop: -4, marginBottom: 8 }}>{hint}</div>}
       {children}
     </div>
   );
@@ -706,38 +807,6 @@ function Row3({ children }: { children: React.ReactNode }) {
     <div className="grid-3" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
       {children}
     </div>
-  );
-}
-
-function RadioCard({ checked, onClick, title, desc }: { checked: boolean; onClick: () => void; title: string; desc: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        textAlign: 'left',
-        padding: '18px 20px',
-        cursor: 'pointer',
-        borderRadius: 'var(--radius-lg)',
-        border: `1.5px solid ${checked ? 'var(--brand)' : 'var(--border-strong)'}`,
-        background: checked ? 'color-mix(in oklab, var(--brand) 8%, var(--surface))' : 'var(--surface)',
-        transition: 'all 0.15s',
-      }}
-    >
-      <div
-        style={{
-          width: 18,
-          height: 18,
-          borderRadius: 999,
-          border: `2px solid ${checked ? 'var(--brand)' : 'var(--border-strong)'}`,
-          background: checked ? 'var(--brand)' : 'transparent',
-          boxShadow: checked ? 'inset 0 0 0 3px var(--surface)' : 'none',
-          marginBottom: 12,
-        }}
-      />
-      <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>{title}</div>
-      <div style={{ fontSize: 13, color: 'var(--muted)' }}>{desc}</div>
-    </button>
   );
 }
 
@@ -806,39 +875,7 @@ function ConsentRow({
         {checked && <span style={{ color: 'var(--surface)', fontSize: 12, fontWeight: 700 }}>✓</span>}
       </span>
       <input type="checkbox" checked={checked} onChange={onChange} style={{ display: 'none' }} />
-      <span style={{ fontSize: 14, color: 'var(--text)' }}>{children}</span>
+      <span style={{ fontSize: 14, color: 'var(--text)', lineHeight: 1.5 }}>{children}</span>
     </label>
-  );
-}
-
-function ReviewBlock({ heading, rows }: { heading: string; rows: [string, string][] }) {
-  return (
-    <div style={{ marginBottom: 16 }}>
-      <div className="eyebrow" style={{ marginBottom: 8 }}>{heading}</div>
-      <div
-        style={{
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-lg)',
-          background: 'var(--bg)',
-          overflow: 'hidden',
-        }}
-      >
-        {rows.map(([k, v], i) => (
-          <div
-            key={k}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '180px 1fr',
-              gap: 16,
-              padding: '12px 16px',
-              borderBottom: i < rows.length - 1 ? '1px solid var(--hairline)' : 'none',
-            }}
-          >
-            <span style={{ color: 'var(--muted)', fontSize: 14 }}>{k}</span>
-            <strong style={{ fontSize: 14 }}>{v}</strong>
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }

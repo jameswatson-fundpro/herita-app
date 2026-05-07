@@ -5,7 +5,15 @@ import { generateRef, saveSubmission } from '@/lib/submissions';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-type Body = Record<string, unknown> & { email?: string; firstName?: string; lastName?: string };
+type Body = Record<string, unknown> & {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  applicationId?: string;
+  step?: string;
+  stepIndex?: number;
+  partial?: boolean;
+};
 
 async function postWebhook(url: string, payload: unknown): Promise<{ ok: boolean; error?: string }> {
   try {
@@ -54,29 +62,45 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Invalid JSON' }, { status: 400 });
   }
 
-  // Minimal validation — server-side trust nothing
+  const isPartial = body.partial === true;
+  const stepLabel = typeof body.step === 'string' ? body.step : 'unknown';
+
+  // Validation:
+  //   • Final submit: require a valid email (existing behaviour).
+  //   • Partial save (per-step): only require email when the step is the
+  //     applicant step (where email is collected). For other partial saves
+  //     we accept whatever is given so executor/lawyer-only steps still
+  //     post through.
   const email = typeof body.email === 'string' ? body.email.trim() : '';
-  if (!email || !/.+@.+\..+/.test(email)) {
+  const needsEmail = !isPartial || stepLabel === 'applicant';
+  if (needsEmail && (!email || !/.+@.+\..+/.test(email))) {
     return NextResponse.json({ ok: false, error: 'A valid email is required' }, { status: 400 });
   }
 
-  const ref = generateRef();
+  // applicationId reuses the same ref across partial saves so backend
+  // systems can upsert by it. The first partial save assigns one and the
+  // client echoes it back on subsequent calls.
+  const incomingId = typeof body.applicationId === 'string' && body.applicationId ? body.applicationId : null;
+  const applicationId = incomingId || generateRef();
+  const ref = applicationId; // user-facing ref == applicationId for simplicity
   const receivedAt = new Date().toISOString();
   const payload = {
     ref,
+    applicationId,
     receivedAt,
     source: 'herita.com.au',
+    partial: isPartial,
+    step: stepLabel,
+    stepIndex: typeof body.stepIndex === 'number' ? body.stepIndex : undefined,
     ...body,
   };
 
-  // Primary webhook (required)
+  // Primary webhook (required) — fires for every step (partial + final)
   const primaryUrl = process.env.WEBHOOK_URL;
   let webhookResult: { ok: boolean; error?: string } = { ok: true };
   if (primaryUrl) {
     webhookResult = await postWebhook(primaryUrl, payload);
   } else if (process.env.NODE_ENV === 'production') {
-    // In production, no webhook configured = misconfiguration. We still 200
-    // so the user has a smooth experience, but log it loudly.
     console.error('[apply] WEBHOOK_URL not set — submission stored locally only');
   }
 
@@ -88,23 +112,26 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // Confirmation email (best-effort)
-  void sendApplicantEmail({
-    to: email,
-    ref,
-    firstName: typeof body.firstName === 'string' ? body.firstName : undefined,
-  }).catch((e) => {
-    console.error('[apply] confirmation email failed', e);
-  });
+  // Confirmation email — only on final submit, never on partial saves.
+  if (!isPartial && email) {
+    void sendApplicantEmail({
+      to: email,
+      ref,
+      firstName: typeof body.firstName === 'string' ? body.firstName : undefined,
+    }).catch((e) => {
+      console.error('[apply] confirmation email failed', e);
+    });
+  }
 
-  // Store for /admin
+  // Store for /admin. Each save is appended; the admin view can group by
+  // applicationId to see the latest version of each application.
   saveSubmission({
     ref,
     receivedAt,
     status: webhookResult.ok ? 'webhook-ok' : 'webhook-failed',
     webhookError: webhookResult.error,
-    data: body,
+    data: { ...body, applicationId, partial: isPartial, step: stepLabel },
   });
 
-  return NextResponse.json({ ok: true, ref });
+  return NextResponse.json({ ok: true, ref, applicationId });
 }
