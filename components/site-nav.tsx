@@ -7,8 +7,6 @@ import { useTheme } from './theme-provider';
 import { useState } from 'react';
 
 const NAV: { href: string; label: string }[] = [
-  { href: '/inheritance-advance', label: 'Inheritance Advance' },
-  { href: '/executor-loan', label: 'Executor Loan' },
   { href: '/partners', label: 'Partners' },
 ];
 

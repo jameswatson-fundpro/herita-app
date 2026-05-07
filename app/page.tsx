@@ -65,13 +65,13 @@ export default function HomePage() {
 
             {/* KPI strip */}
             <div
-              className="grid-4"
+              className="grid-3"
               style={{
                 marginTop: 56,
                 paddingTop: 28,
                 borderTop: '1px solid var(--hairline)',
                 display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
+                gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: 24,
               }}
             >
@@ -81,11 +81,11 @@ export default function HomePage() {
                   <div
                     style={{
                       fontFamily: 'var(--font-display)',
-                      fontSize: 36,
+                      fontSize: v.length > 15 ? 18 : 36,
                       fontWeight: 500,
                       color: 'var(--ink)',
                       marginTop: 4,
-                      lineHeight: 1,
+                      lineHeight: 1.3,
                     }}
                   >
                     {v}

@@ -5,23 +5,17 @@ import { SITE } from '@/lib/site';
 export function SiteFooter() {
   const groups: { title: string; items: { label: string; href: string }[] }[] = [
     {
-      title: 'Products',
-      items: [
-        { label: 'Inheritance Advance', href: '/inheritance-advance' },
-        { label: 'Executor Loan', href: '/executor-loan' },
-        { label: 'Calculator', href: '/#calculator' },
-      ],
-    },
-    {
       title: 'Company',
       items: [
         { label: 'Partners', href: '/partners' },
-        { label: 'Contact', href: 'mailto:hello@herita.com.au' },
+        { label: 'Contact', href: '/contact' },
       ],
     },
     {
       title: 'Legal',
-      items: SITE.legal.pages.map((p) => ({ label: p.title, href: `/legal/${p.slug}` })),
+      items: SITE.legal.pages
+        .filter((p) => p.slug !== 'terms')
+        .map((p) => ({ label: p.title, href: `/legal/${p.slug}` })),
     },
   ];
 
@@ -36,8 +30,8 @@ export function SiteFooter() {
     >
       <div className="container">
         <div
-          className="grid-4"
-          style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr', gap: 32 }}
+          className="grid-3"
+          style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: 32 }}
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
