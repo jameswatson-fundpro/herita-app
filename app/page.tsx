@@ -75,23 +75,33 @@ export default function HomePage() {
                 gap: 24,
               }}
             >
-              {SITE.trustKpis.map(([k, v]) => (
-                <div key={k}>
-                  <div className="eyebrow">{k}</div>
-                  <div
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: v.length > 15 ? 18 : 36,
-                      fontWeight: 500,
-                      color: 'var(--ink)',
-                      marginTop: 4,
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {v}
+              {SITE.trustKpis.map(([k, v]) => {
+                const parenIdx = v.indexOf('(');
+                const main = parenIdx > -1 ? v.slice(0, parenIdx).trim() : v;
+                const sub = parenIdx > -1 ? v.slice(parenIdx) : null;
+                return (
+                  <div key={k}>
+                    <div className="eyebrow">{k}</div>
+                    <div
+                      style={{
+                        fontFamily: 'var(--font-display)',
+                        fontSize: 36,
+                        fontWeight: 500,
+                        color: 'var(--ink)',
+                        marginTop: 4,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {main}
+                    </div>
+                    {sub && (
+                      <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 4, lineHeight: 1.4 }}>
+                        {sub}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
@@ -142,56 +152,6 @@ export default function HomePage() {
           </div>
         </Section>
 
-        {/* Products */}
-        <Section eyebrow="Our products" title="Two facilities. Both non-recourse.">
-          <div className="grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
-            {SITE.products.map((p, i) => (
-              <article
-                key={p.slug}
-                style={{
-                  background: 'var(--surface)',
-                  border: '1px solid var(--border)',
-                  padding: 36,
-                  borderRadius: 'var(--radius-xl)',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}
-              >
-                <div style={{ position: 'absolute', top: 28, right: 28, opacity: 0.4 }}>
-                  {i === 0 ? (
-                    <Illust.willDocument size={120} stroke="var(--brand)" accent="var(--brand-2)" />
-                  ) : (
-                    <Illust.fundsForward size={140} stroke="var(--brand)" accent="var(--brand-2)" />
-                  )}
-                </div>
-                <div className="eyebrow">{p.eyebrow}</div>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 32, margin: '8px 0 14px', lineHeight: 1.1 }}>
-                  {p.title}
-                </h3>
-                <p style={{ color: 'var(--muted)', lineHeight: 1.55, marginBottom: 20, maxWidth: '70%' }}>{p.lead}</p>
-                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 24px' }}>
-                  {p.bullets.map((b) => (
-                    <li
-                      key={b}
-                      style={{
-                        padding: '10px 0',
-                        borderBottom: '1px solid var(--hairline)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 10,
-                        fontSize: 14,
-                      }}
-                    >
-                      <Icons.check size={14} stroke={2} style={{ color: 'var(--brand)' }} />
-                      <span>{b}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href={`/${p.slug}`} className="btn btn-ghost">Learn more →</Link>
-              </article>
-            ))}
-          </div>
-        </Section>
 
         {/* Money uses */}
         <Section eyebrow="Common purposes" title="What people use their advance for">
