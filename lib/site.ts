@@ -73,6 +73,113 @@ export const SITE = {
       ['Conservative lending limits', 'Advances are capped at 50% of assessed estate value, with discount factors per asset class.'],
     ] as const,
   },
+  faqs: [
+    {
+      category: 'About inheritance advances',
+      items: [
+        {
+          q: 'How is an inheritance advance different from a traditional loan?',
+          a: 'Traditional loans assess your personal income and assets to determine repayment ability, and typically require security. An inheritance advance evaluates your entitlement from a deceased estate instead. There are no monthly repayments — the advance, fees, and interest are repaid only when the estate distributes.',
+        },
+        {
+          q: 'Who is an inheritance advance for?',
+          a: 'Any individual who is a beneficiary of a deceased estate can apply. You do not need to meet standard lending criteria such as minimum income or employment status.',
+        },
+        {
+          q: 'When can I apply?',
+          a: "You can apply as soon as you know you are entitled to an inheritance. You will need a will (if one exists), a death certificate, and a basic picture of the estate's assets and liabilities.",
+        },
+        {
+          q: 'What can I use the funds for?',
+          a: 'Funds are unrestricted — beneficiaries commonly use advances for home deposits, essential repairs, education fees, funeral costs, or everyday living expenses. Herita is a responsible lender and will consider whether the intended use is in your best interests.',
+        },
+        {
+          q: 'What if there are other beneficiaries?',
+          a: 'Multiple beneficiaries can each apply independently based on their own share of the estate. One beneficiary taking an advance does not affect another beneficiary\'s entitlement.',
+        },
+        {
+          q: 'Will the other beneficiaries know I have taken an advance?',
+          a: 'Other beneficiaries will not be notified by Herita. The executor of the estate will need to be aware so that repayment can be made from your share at distribution.',
+        },
+        {
+          q: 'Will my advance affect what other beneficiaries receive?',
+          a: 'No. Repayment is made from your share of the estate only, leaving other beneficiaries\' distributions unchanged.',
+        },
+      ],
+    },
+    {
+      category: 'Eligibility',
+      items: [
+        {
+          q: 'My credit history is poor — can I still apply?',
+          a: 'Our assessment focuses primarily on the value of your inheritance rather than your personal financial history. We conduct a credit check as part of our responsible lending obligations, but a poor credit history does not automatically disqualify you.',
+        },
+        {
+          q: 'Will you decline my application based on my income or employment?',
+          a: 'No. Our lending decisions are based on your assessed inheritance entitlement, not your employment status or income.',
+        },
+        {
+          q: 'Can I apply if there is no will?',
+          a: 'Yes, though applications on intestate estates (no will) take longer to assess, as we need to confirm your entitlement through other means.',
+        },
+        {
+          q: 'Do I need a professional executor managing the estate?',
+          a: 'Yes. We require at least one professional to be involved in estate administration — a professional executor, probate lawyer, or conveyancing solicitor. This is a security requirement that protects all parties.',
+        },
+      ],
+    },
+    {
+      category: 'How much you can borrow',
+      items: [
+        {
+          q: 'How much can I borrow?',
+          a: 'Up to 50% of your assessed share of the estate, after accounting for estate liabilities and applicable discount factors by asset class. Eligible assets include real property, cash, listed investments, and superannuation. The minimum advance is $30,000.',
+        },
+        {
+          q: 'How quickly will I receive funds?',
+          a: 'Once your application is approved and contracts are signed, funds are typically transferred to your account the next business day. We aim to provide an initial decision within 48 hours of receiving your application.',
+        },
+      ],
+    },
+    {
+      category: 'Costs',
+      items: [
+        {
+          q: 'How much does an advance cost?',
+          a: 'Herita charges a one-time setup fee of 2% of the advance amount (minimum $1,500), plus simple monthly interest of 2% per month on the outstanding advance. Both the setup fee and interest are paid only when your inheritance is distributed — nothing is due in the meantime.',
+        },
+        {
+          q: 'Do you charge simple or compound interest?',
+          a: 'We charge simple interest only. Interest is calculated on the original advance amount each month — we do not charge interest on accrued interest.',
+        },
+        {
+          q: 'What should I consider before taking an advance?',
+          a: 'The advance reduces the total inheritance you ultimately receive, because repayment includes the advance amount, setup fee, and accrued interest. The longer the estate takes to settle, the more interest accumulates. We recommend using our calculator to estimate the total cost before applying.',
+        },
+      ],
+    },
+    {
+      category: 'Repayment',
+      items: [
+        {
+          q: 'When do I repay the advance?',
+          a: 'Repayment is made directly from your share of the estate when it is ready for distribution. You make no payments in the meantime.',
+        },
+        {
+          q: 'Are there early repayment fees?',
+          a: 'No. You can repay the advance at any time with no penalty — you pay only the outstanding advance amount plus interest accrued to the repayment date.',
+        },
+        {
+          q: "What happens if my final inheritance doesn't cover the amount owed?",
+          a: "Provided you are not in default under your agreement, this risk is borne by Herita, not you. The advance is non-recourse — your liability is limited to your share of the estate, and your other personal assets are never at risk.",
+        },
+        {
+          q: 'What if I change my mind after receiving the funds?',
+          a: 'You can repay the advance at any time. There are no early repayment fees — you simply return the advance amount plus interest and the setup fee accrued to the date of repayment.',
+        },
+      ],
+    },
+  ],
   legal: {
     pages: [
       { slug: 'privacy', title: 'Privacy Policy' },
