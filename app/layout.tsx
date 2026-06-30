@@ -6,15 +6,15 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://herita.com.au'),
   title: {
-    default: 'Herita — Your inheritance, when you need it',
-    template: '%s · Herita',
+    default: 'Inherita — Your inheritance, when you need it',
+    template: '%s · Inherita',
   },
   description:
-    'Estate settlement takes time. Herita advances funds against your confirmed inheritance — no monthly repayments, repaid from the estate at settlement.',
+    'Estate settlement takes time. Inherita advances funds against your confirmed inheritance — no monthly repayments, repaid from the estate at settlement.',
   openGraph: {
-    title: 'Herita — Your inheritance, when you need it',
+    title: 'Inherita — Your inheritance, when you need it',
     description:
-      'Estate settlement takes time. Herita advances funds against your confirmed inheritance.',
+      'Estate settlement takes time. Inherita advances funds against your confirmed inheritance.',
     type: 'website',
   },
   robots: { index: true, follow: true },

@@ -24,7 +24,7 @@ export default function PartnersPage() {
                   Estate lawyers, financial planners and trustee firms refer clients to Herita when their families need funds before settlement. Plain documentation, no client out-of-pocket exposure, no surprises.
                 </p>
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  <Link href="mailto:partners@herita.com.au" className="btn btn-primary">Get in touch →</Link>
+                  <Link href="mailto:info@inherita.com.au" className="btn btn-primary">Get in touch →</Link>
                 </div>
               </div>
               <Illust.fairness size={260} stroke="var(--ink)" accent="var(--brand-2)" />
@@ -74,7 +74,7 @@ export default function PartnersPage() {
             <p style={{ color: 'var(--muted)', maxWidth: 520, margin: '0 auto 24px', lineHeight: 1.6 }}>
               We&rsquo;re happy to walk through the product, our security framework, and how referrals work.
             </p>
-            <Link href="mailto:partners@herita.com.au" className="btn btn-primary">partners@herita.com.au →</Link>
+            <Link href="mailto:info@inherita.com.au" className="btn btn-primary">info@inherita.com.au →</Link>
           </div>
         </section>
       </main>

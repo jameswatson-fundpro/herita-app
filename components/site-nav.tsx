@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Logomark } from './logomark';
 import { useTheme } from './theme-provider';
 import { useState } from 'react';
 
@@ -37,7 +36,6 @@ export function SiteNav() {
             color: 'var(--ink)',
           }}
         >
-          <Logomark size={36} fill="var(--brand)" glyph="var(--surface)" />
           <span
             style={{
               fontFamily: 'var(--font-display)',
@@ -46,7 +44,7 @@ export function SiteNav() {
               letterSpacing: '0.01em',
             }}
           >
-            Herita
+            Inherita
           </span>
         </Link>
 

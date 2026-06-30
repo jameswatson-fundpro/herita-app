@@ -1,7 +1,7 @@
 import { SiteNav } from '@/components/site-nav';
 import { SiteFooter } from '@/components/site-footer';
 
-export const metadata = { title: 'Contact — Herita' };
+export const metadata = { title: 'Contact — Inherita' };
 
 export default function ContactPage() {
   return (
@@ -58,8 +58,8 @@ export default function ContactPage() {
                 </h2>
 
                 {[
-                  { label: 'Email', value: 'hello@herita.com.au', href: 'mailto:hello@herita.com.au' },
-                  { label: 'Phone', value: '+61 2 0000 0000', href: 'tel:+61200000000' },
+                  { label: 'Email', value: 'info@inherita.com.au', href: 'mailto:info@inherita.com.au' },
+                  { label: 'Phone', value: '1300 96 98 00', href: 'tel:1300969800' },
                   { label: 'Hours', value: 'Monday – Friday, 9 am – 5 pm AEST', href: null },
                 ].map(({ label, value, href }) => (
                   <div

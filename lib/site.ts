@@ -2,10 +2,10 @@
 
 export const SITE = {
   brand: {
-    name: 'Herita',
-    legalName: 'Herita Lending Pty Ltd',
-    acn: 'XXX XXX XXX',
-    acl: 'XXXXXX',
+    name: 'Inherita',
+    legalName: 'Trivaro Lending Pty Ltd',
+    acn: '687 211 276',
+    acl: '459305',
   },
   hero: {
     title: 'Your inheritance,\nwhen you need it.',
@@ -91,7 +91,7 @@ export const SITE = {
         },
         {
           q: 'What can I use the funds for?',
-          a: 'Funds are unrestricted — beneficiaries commonly use advances for home deposits, essential repairs, education fees, funeral costs, or everyday living expenses. Herita is a responsible lender and will consider whether the intended use is in your best interests.',
+          a: 'Funds are unrestricted — beneficiaries commonly use advances for home deposits, essential repairs, education fees, funeral costs, or everyday living expenses. Inherita is a responsible lender and will consider whether the intended use is in your best interests.',
         },
         {
           q: 'What if there are other beneficiaries?',
@@ -99,7 +99,7 @@ export const SITE = {
         },
         {
           q: 'Will the other beneficiaries know I have taken an advance?',
-          a: 'Other beneficiaries will not be notified by Herita. The executor of the estate will need to be aware so that repayment can be made from your share at distribution.',
+          a: 'Other beneficiaries will not be notified by Inherita. The executor of the estate will need to be aware so that repayment can be made from your share at distribution.',
         },
         {
           q: 'Will my advance affect what other beneficiaries receive?',
@@ -146,7 +146,7 @@ export const SITE = {
       items: [
         {
           q: 'How much does an advance cost?',
-          a: 'Herita charges a one-time setup fee of 2% of the advance amount (minimum $1,500), plus simple monthly interest of 2% per month on the outstanding advance. Both the setup fee and interest are paid only when your inheritance is distributed — nothing is due in the meantime.',
+          a: 'Inherita charges a one-time setup fee of 2% of the advance amount (minimum $1,500), plus simple monthly interest of 2% per month on the outstanding advance. Both the setup fee and interest are paid only when your inheritance is distributed — nothing is due in the meantime.',
         },
         {
           q: 'Do you charge simple or compound interest?',
@@ -171,7 +171,7 @@ export const SITE = {
         },
         {
           q: "What happens if my final inheritance doesn't cover the amount owed?",
-          a: "Provided you are not in default under your agreement, this risk is borne by Herita, not you. The advance is non-recourse — your liability is limited to your share of the estate, and your other personal assets are never at risk.",
+          a: "Provided you are not in default under your agreement, this risk is borne by Inherita, not you. The advance is non-recourse — your liability is limited to your share of the estate, and your other personal assets are never at risk.",
         },
         {
           q: 'What if I change my mind after receiving the funds?',
