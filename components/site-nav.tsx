@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from './theme-provider';
+import { Logomark } from './logomark';
 import { useState } from 'react';
 
 const NAV: { href: string; label: string }[] = [
@@ -31,11 +32,12 @@ export function SiteNav() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 12,
+            gap: 11,
             textDecoration: 'none',
             color: 'var(--ink)',
           }}
         >
+          <Logomark size={34} />
           <span
             style={{
               fontFamily: 'var(--font-display)',

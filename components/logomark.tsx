@@ -1,16 +1,24 @@
-// Logomark — block tile (the locked direction). Filled rounded square,
-// reversed-out symmetric H. Reads as a clean wordmark initial at any size.
+// Logomark — Inherita "capped branch" (concept 4c).
+// A serif cap crowns a single stem that descends and divides to two
+// beneficiary nodes: one estate, passed down and shared. Reads as an
+// abstract 'I' at a glance; holds its shape down to a 16px favicon.
+//
+// Colours come from the theme tokens so the mark adapts to light/dark:
+//   cap    → forest (--brand)     stem → brass (--brand-2)   beads → terracotta (--accent)
+// In `tile` form the mark reverses out of a forest square (avatars, app icon).
 
 type Props = {
   size?: number;
-  fill?: string;       // tile colour
-  glyph?: string;      // H colour (defaults to var(--surface))
+  variant?: 'mark' | 'tile';   // standalone on the page | reversed inside a forest tile
   className?: string;
 };
 
-export function Logomark({ size = 36, fill, glyph, className }: Props) {
-  const s = fill ?? 'var(--brand)';
-  const a = glyph ?? 'var(--surface)';
+export function Logomark({ size = 36, variant = 'mark', className }: Props) {
+  const tile = variant === 'tile';
+  const cap = tile ? 'var(--surface)' : 'var(--brand)';
+  const stem = tile ? 'var(--surface)' : 'var(--brand-2)';
+  const bead = tile ? 'var(--brand-2)' : 'var(--accent)';
+
   return (
     <svg
       viewBox="0 0 64 64"
@@ -21,10 +29,17 @@ export function Logomark({ size = 36, fill, glyph, className }: Props) {
       aria-hidden="true"
       className={className}
     >
-      <rect x="2" y="2" width="60" height="60" rx="14" fill={s} />
-      <rect x="16" y="14" width="8" height="36" fill={a} />
-      <rect x="40" y="14" width="8" height="36" fill={a} />
-      <rect x="16" y="28" width="32" height="8" fill={a} />
+      {tile && <rect x="2" y="2" width="60" height="60" rx="14" fill="var(--brand)" />}
+      <rect x="22" y="14" width="20" height="3.6" rx="0.5" fill={cap} />
+      <path
+        d="M32 19 V33 M32 33 L22 47 M32 33 L42 47"
+        fill="none"
+        stroke={stem}
+        strokeWidth="2.6"
+        strokeLinecap="round"
+      />
+      <circle cx="22" cy="48" r="4.5" fill={bead} />
+      <circle cx="42" cy="48" r="4.5" fill={bead} />
     </svg>
   );
 }
