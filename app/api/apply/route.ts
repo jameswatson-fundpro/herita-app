@@ -86,6 +86,28 @@ export async function POST(req: NextRequest) {
   const applicationId = incomingId || generateRef(firstName, lastName);
   const ref = applicationId; // user-facing ref == applicationId for simplicity
   const receivedAt = new Date().toISOString();
+
+  // Build a flat, Zapier-friendly payload. Explicit fields win over raw body;
+  // useOfFunds array is joined to a string so Zapier doesn't see JSON arrays.
+  // Empty strings are omitted so partial saves don't flood Zapier with blanks.
+  const rawBody = { ...body } as Record<string, unknown>;
+  delete rawBody.applicationId; // use the canonical one below
+  delete rawBody.partial;
+  delete rawBody.step;
+  delete rawBody.stepIndex;
+
+  const useOfFunds = Array.isArray(rawBody.useOfFunds)
+    ? (rawBody.useOfFunds as string[]).join(', ')
+    : typeof rawBody.useOfFunds === 'string'
+    ? rawBody.useOfFunds
+    : '';
+  delete rawBody.useOfFunds;
+
+  // Strip empty strings so Zapier field-mapping stays clean on partial saves
+  const bodyFields = Object.fromEntries(
+    Object.entries(rawBody).filter(([, v]) => v !== '' && v !== null && v !== undefined)
+  );
+
   const payload = {
     ref,
     applicationId,
@@ -94,7 +116,8 @@ export async function POST(req: NextRequest) {
     partial: isPartial,
     step: stepLabel,
     stepIndex: typeof body.stepIndex === 'number' ? body.stepIndex : undefined,
-    ...body,
+    ...bodyFields,
+    ...(useOfFunds ? { useOfFunds } : {}),
   };
 
   // Primary webhook (required) — fires for every step (partial + final)
