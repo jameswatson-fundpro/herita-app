@@ -41,7 +41,7 @@ async function sendApplicantEmail(opts: { to: string; ref: string; firstName?: s
   await resend.emails.send({
     from,
     to: opts.to,
-    subject: `Your Herita application — ${opts.ref}`,
+    subject: `Your Inherita application — ${opts.ref}`,
     text: `${greet}
 
 Thank you — we have received your application. A specialist will be in touch within one business day.
@@ -50,7 +50,7 @@ Your reference number: ${opts.ref}
 
 If anything is urgent, reply to this email and a member of our team will respond.
 
-— The Herita team`,
+— The Inherita team`,
   });
 }
 
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     ref,
     applicationId,
     receivedAt,
-    source: 'herita.com.au',
+    source: 'inherita.com.au',
     partial: isPartial,
     step: stepLabel,
     stepIndex: typeof body.stepIndex === 'number' ? body.stepIndex : undefined,

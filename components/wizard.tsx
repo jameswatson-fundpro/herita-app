@@ -106,6 +106,11 @@ export function Wizard() {
   const [stepError, setStepError] = useState<string | null>(null);
   const [savingStep, setSavingStep] = useState(false);
   const applicationIdRef = useRef<string | null>(null);
+  const pageUrlRef = useRef<string>('');
+
+  useEffect(() => {
+    pageUrlRef.current = window.location.href;
+  }, []);
 
   const params = useSearchParams();
   // Prefill amount from /apply?inheritance=...&pct=...
@@ -189,6 +194,7 @@ export function Wizard() {
           stepIndex: idx,
           partial: idx < STEPS.length - 1,
           applicationId: applicationIdRef.current,
+          pageUrl: pageUrlRef.current,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as {
@@ -244,6 +250,7 @@ export function Wizard() {
           stepIndex: STEPS.length - 1,
           partial: false,
           applicationId: applicationIdRef.current,
+          pageUrl: pageUrlRef.current,
         }),
       });
       const data = (await res.json().catch(() => ({}))) as {
