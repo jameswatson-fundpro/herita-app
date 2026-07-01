@@ -41,12 +41,12 @@ export function listSubmissions(): Submission[] {
   return [...store()];
 }
 
-export function generateRef(): string {
-  // Short human-readable reference: HRT-YYMMDD-XXXX
+export function generateRef(firstName?: string, lastName?: string): string {
   const now = new Date();
   const yy = String(now.getFullYear()).slice(-2);
   const mm = String(now.getMonth() + 1).padStart(2, '0');
   const dd = String(now.getDate()).padStart(2, '0');
-  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `HRT-${yy}${mm}${dd}-${rand}`;
+  const f = (firstName ?? '').replace(/[^a-zA-Z]/g, '').slice(0, 2).toUpperCase().padEnd(2, 'X');
+  const l = (lastName ?? '').replace(/[^a-zA-Z]/g, '').slice(0, 2).toUpperCase().padEnd(2, 'X');
+  return `${f}${l}${yy}${mm}${dd}`;
 }

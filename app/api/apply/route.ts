@@ -81,7 +81,9 @@ export async function POST(req: NextRequest) {
   // systems can upsert by it. The first partial save assigns one and the
   // client echoes it back on subsequent calls.
   const incomingId = typeof body.applicationId === 'string' && body.applicationId ? body.applicationId : null;
-  const applicationId = incomingId || generateRef();
+  const firstName = typeof body.firstName === 'string' ? body.firstName : undefined;
+  const lastName = typeof body.lastName === 'string' ? body.lastName : undefined;
+  const applicationId = incomingId || generateRef(firstName, lastName);
   const ref = applicationId; // user-facing ref == applicationId for simplicity
   const receivedAt = new Date().toISOString();
   const payload = {
