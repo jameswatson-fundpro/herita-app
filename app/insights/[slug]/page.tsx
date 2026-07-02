@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { SiteNav } from '@/components/site-nav';
+import { SiteFooter } from '@/components/site-footer';
 import { getArticle, getAllSlugs, type Block } from '@/lib/blog';
 
 export async function generateStaticParams() {
@@ -189,6 +191,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
 
   return (
     <>
+      <SiteNav />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -359,7 +362,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
             {/* Back to blog */}
             <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
               <Link
-                href="/blog"
+                href="/insights"
                 style={{ color: 'var(--muted)', fontSize: 14, textDecoration: 'none' }}
               >
                 ← All articles
@@ -368,6 +371,8 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
           </div>
         </section>
       </main>
+
+      <SiteFooter />
     </>
   );
 }

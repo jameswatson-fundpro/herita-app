@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { SiteNav } from '@/components/site-nav';
+import { SiteFooter } from '@/components/site-footer';
 import { articles } from '@/lib/blog';
 
 export const metadata: Metadata = {
@@ -21,7 +23,7 @@ export default function BlogIndexPage() {
   }) {
     return (
       <Link
-        href={`/blog/${slug}`}
+        href={`/insights/${slug}`}
         style={{ textDecoration: 'none', color: 'inherit' }}
       >
         <article
@@ -90,7 +92,9 @@ export default function BlogIndexPage() {
   }
 
   return (
-    <main>
+    <>
+      <SiteNav />
+      <main>
       {/* Hero */}
       <section
         style={{
@@ -234,6 +238,8 @@ export default function BlogIndexPage() {
           </Link>
         </div>
       </section>
-    </main>
+      </main>
+      <SiteFooter />
+    </>
   );
 }

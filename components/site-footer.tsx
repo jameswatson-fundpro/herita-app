@@ -8,6 +8,7 @@ export function SiteFooter() {
       items: [
         { label: 'Partners', href: '/partners' },
         { label: 'FAQs', href: '/faqs' },
+        { label: 'Insights', href: '/insights' },
         { label: 'Contact', href: '/contact' },
       ],
     },
