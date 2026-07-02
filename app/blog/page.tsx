@@ -25,6 +25,7 @@ export default function BlogIndexPage() {
         style={{ textDecoration: 'none', color: 'inherit' }}
       >
         <article
+          className="blog-card"
           style={{
             background: 'var(--bg)',
             border: '1px solid var(--hairline)',
@@ -34,13 +35,6 @@ export default function BlogIndexPage() {
             flexDirection: 'column',
             gap: 12,
             height: '100%',
-            transition: 'border-color 0.15s',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.borderColor = 'var(--brand)';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.borderColor = 'var(--hairline)';
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>

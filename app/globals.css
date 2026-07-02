@@ -119,6 +119,9 @@ h1, h2, h3, h4 { color: var(--ink); margin: 0; }
 }
 .btn-ghost:hover { background: var(--surface); }
 
+.blog-card { transition: border-color 0.15s; }
+.blog-card:hover { border-color: var(--brand) !important; }
+
 .btn-on-dark {
   background: var(--brand-2);
   color: var(--ink);
