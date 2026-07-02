@@ -554,7 +554,7 @@ export function Wizard() {
             <div style={{ borderTop: '1px solid var(--hairline)', paddingTop: 20, marginTop: 20 }}>
               <FieldLabel>Consents</FieldLabel>
               <ConsentRow checked={form.consentElectronic} onChange={set('consentElectronic')}>
-                I consent to receiving notices, statements, disclosures and other documents from Trivaro electronically using the email address provided above. I must check my email account regularly for electronic communications from Herita.
+                I consent to receiving notices, statements, disclosures and other documents from Trivaro electronically using the email address provided above. I must check my email account regularly for electronic communications from Inherita.
               </ConsentRow>
               <ConsentRow checked={form.consentPrivacy} onChange={set('consentPrivacy')}>
                 I have read and agree to Trivaro&rsquo;s <a href="/legal/privacy" target="_blank" rel="noreferrer" style={{ color: 'var(--brand)' }}>Privacy Consent Form</a> and consent to the collection, use, holding and disclosure of my personal information as set out in that document.
