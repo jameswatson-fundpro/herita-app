@@ -315,7 +315,7 @@ const CONTENT: Record<string, { title: string; updated: string; sections: { head
     updated: 'January 2025',
     sections: [
       { heading: 'Use of this website', body: [
-        `By using herita.com.au you agree to these Terms. The site is provided for general information only and does not constitute financial product advice. We may amend these Terms from time to time; the current version applies.`,
+        `By using inherita.com.au you agree to these Terms. The site is provided for general information only and does not constitute financial product advice. We may amend these Terms from time to time; the current version applies.`,
       ] },
       { heading: 'No advice', body: [
         `Information on this site is general in nature and does not take into account your objectives, financial situation or needs. Calculator outputs are indicative only — your actual offer will reflect the assessment of your application.`,

@@ -19,6 +19,9 @@ export async function generateMetadata({
   return {
     title: article.metaTitle,
     description: article.metaDescription,
+    alternates: {
+      canonical: `https://inherita.com.au/insights/${article.slug}`,
+    },
     openGraph: {
       title: article.metaTitle,
       description: article.metaDescription,
@@ -132,6 +135,54 @@ function renderBlock(block: Block, i: number) {
                   >
                     {value}
                   </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    case 'compare-table':
+      return (
+        <div key={i} style={{ overflowX: 'auto', marginBottom: '1.25rem' }}>
+          <table
+            style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: '0.92rem',
+            }}
+          >
+            <thead>
+              <tr style={{ background: 'var(--brand)' }}>
+                {block.headers.map((h, hi) => (
+                  <th
+                    key={hi}
+                    style={{
+                      padding: '0.6rem 0.75rem',
+                      textAlign: 'left',
+                      fontWeight: 600,
+                      color: 'var(--bg)',
+                    }}
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {block.rows.map((row, ri) => (
+                <tr key={ri} style={{ background: ri % 2 === 1 ? 'var(--surface)' : 'transparent' }}>
+                  {row.map((cell, ci) => (
+                    <td
+                      key={ci}
+                      dangerouslySetInnerHTML={{ __html: cell }}
+                      style={{
+                        padding: '0.6rem 0.75rem',
+                        borderBottom: '1px solid var(--hairline)',
+                        fontWeight: ci === 0 ? 600 : 400,
+                        color: 'var(--ink)',
+                      }}
+                    />
+                  ))}
                 </tr>
               ))}
             </tbody>
@@ -327,11 +378,29 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
                       >
                         {faq.q}
                       </p>
-                      <p style={{ color: 'var(--muted)', lineHeight: 1.7 }}>{faq.a}</p>
+                      <p
+                        style={{ color: 'var(--muted)', lineHeight: 1.7 }}
+                        dangerouslySetInnerHTML={{ __html: faq.a }}
+                      />
                     </div>
                   ))}
                 </div>
               </div>
+            )}
+
+            {/* Disclaimer */}
+            {article.disclaimer && (
+              <p
+                style={{
+                  marginTop: '2rem',
+                  fontSize: 12,
+                  fontStyle: 'italic',
+                  color: 'var(--muted)',
+                  lineHeight: 1.6,
+                }}
+              >
+                {article.disclaimer}
+              </p>
             )}
 
             {/* CTA */}

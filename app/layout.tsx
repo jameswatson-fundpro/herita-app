@@ -4,7 +4,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import './globals.css';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://herita.com.au'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://inherita.com.au'),
   title: {
     default: 'Inherita — Your inheritance, when you need it',
     template: '%s · Inherita',
